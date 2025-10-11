@@ -52,9 +52,9 @@
 
   --primary-foreground: 252 10% 98%;
 
-  --secondary: 252 8% 90%;
+  --secondary: 180 65% 60%;
 
-  --secondary-foreground: 252 6% 15%;
+  --secondary-foreground: 180 10% 15%;
 
   --muted: 252 10% 93%;
 
@@ -75,8 +75,12 @@
   --chart-3: 142 76% 36%;
   --chart-4: 280 65% 60%;
   --chart-5: 200 85% 55%;
+  
+  --gold: 45 70% 55%;
+  --gold-foreground: 45 10% 15%;
 
   --font-sans: Inter, -apple-system, system-ui, sans-serif;
+  --font-heading: Orbitron, -apple-system, system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
   --radius: .5rem; /* 8px */
@@ -174,9 +178,9 @@
 
   --primary-foreground: 252 10% 98%;
 
-  --secondary: 252 15% 20%;
+  --secondary: 180 65% 70%;
 
-  --secondary-foreground: 0 0% 95%;
+  --secondary-foreground: 180 10% 98%;
 
   --muted: 252 12% 17%;
 
@@ -197,6 +201,9 @@
   --chart-3: 142 76% 56%;
   --chart-4: 280 65% 70%;
   --chart-5: 200 85% 65%;
+  
+  --gold: 45 75% 60%;
+  --gold-foreground: 45 10% 98%;
 
   --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.20);
   --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.30);

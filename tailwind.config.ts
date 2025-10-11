@@ -83,9 +83,14 @@ export default {
         },
         success: "hsl(var(--chart-3) / <alpha-value>)",
         danger: "hsl(var(--destructive) / <alpha-value>)",
+        gold: {
+          DEFAULT: "hsl(var(--gold) / <alpha-value>)",
+          foreground: "hsl(var(--gold-foreground) / <alpha-value>)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
+        heading: ["var(--font-heading)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
       },

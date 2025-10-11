@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Moon, Sun, Bell, Globe, Key, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -79,13 +80,28 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8 space-y-6 animate-in fade-in duration-300">
-      <div>
-        <h1 className="text-4xl font-bold mb-2" data-testid="text-settings-title">Settings</h1>
+    <motion.div 
+      className="max-w-4xl mx-auto px-6 py-8 space-y-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1 className="text-4xl font-heading font-bold mb-2" data-testid="text-settings-title">Settings</h1>
         <p className="text-muted-foreground">Customize your Aladin.AI experience</p>
-      </div>
+      </motion.div>
 
-      <Card className="p-6 hover-elevate transition-all">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        whileHover={{ scale: 1.01 }}
+      >
+        <Card className="p-6 hover-elevate transition-all">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-primary/10 rounded-lg">
@@ -108,9 +124,16 @@ export default function Settings() {
             data-testid="switch-theme"
           />
         </div>
-      </Card>
+        </Card>
+      </motion.div>
 
-      <Card className="p-6 hover-elevate transition-all">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        whileHover={{ scale: 1.01 }}
+      >
+        <Card className="p-6 hover-elevate transition-all">
         <div className="space-y-4">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-chart-2/10 rounded-lg">
@@ -137,9 +160,16 @@ export default function Settings() {
             </Label>
           </div>
         </div>
-      </Card>
+        </Card>
+      </motion.div>
 
-      <Card className="p-6 hover-elevate transition-all">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        whileHover={{ scale: 1.01 }}
+      >
+        <Card className="p-6 hover-elevate transition-all">
         <div className="space-y-4">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-chart-3/10 rounded-lg">
@@ -165,10 +195,17 @@ export default function Settings() {
             </SelectContent>
           </Select>
         </div>
-      </Card>
+        </Card>
+      </motion.div>
 
       {isAdmin && (
-        <Card className="p-6 hover-elevate transition-all border-primary/20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          whileHover={{ scale: 1.01 }}
+        >
+          <Card className="p-6 hover-elevate transition-all border-primary/20">
           <div className="space-y-4">
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-chart-1/10 rounded-lg">
@@ -218,12 +255,18 @@ export default function Settings() {
               </p>
             </div>
           </div>
-        </Card>
+          </Card>
+        </motion.div>
       )}
 
-      <div className="pt-4 text-center text-sm text-muted-foreground">
+      <motion.div 
+        className="pt-4 text-center text-sm text-muted-foreground"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
         <p>Changes are saved automatically. Last updated: Just now</p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

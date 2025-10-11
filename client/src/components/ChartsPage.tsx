@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { motion } from "framer-motion";
 
 // TODO: remove mock functionality
 const generateMockData = (days: number) => {
@@ -37,10 +38,20 @@ export default function ChartsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div 
+      className="max-w-6xl mx-auto px-6 py-8 space-y-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div>
-          <h1 className="text-3xl font-bold mb-2" data-testid="text-chart-title">Bitcoin Price Chart</h1>
+          <h1 className="text-3xl font-heading font-bold mb-2" data-testid="text-chart-title">Bitcoin Price Chart</h1>
           <p className="text-muted-foreground">Historical price data and trends</p>
         </div>
         <div className="flex gap-2">
@@ -56,9 +67,14 @@ export default function ChartsPage() {
             </Button>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      <Card className="p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Current Price</p>
@@ -101,9 +117,15 @@ export default function ChartsPage() {
             </AreaChart>
           </ResponsiveContainer>
         </ChartContainer>
-      </Card>
+        </Card>
+      </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <motion.div 
+        className="grid md:grid-cols-3 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <Card className="p-4">
           <p className="text-sm text-muted-foreground mb-1">24h High</p>
           <p className="text-xl font-semibold font-mono" data-testid="text-high">$44,120</p>
@@ -116,7 +138,7 @@ export default function ChartsPage() {
           <p className="text-sm text-muted-foreground mb-1">24h Volume</p>
           <p className="text-xl font-semibold font-mono" data-testid="text-volume">$28.5B</p>
         </Card>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

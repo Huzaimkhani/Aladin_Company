@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Newspaper, LineChart, DollarSign } from "lucide-react";
+import { motion } from "framer-motion";
 
 // TODO: remove mock functionality
 const topics = [
@@ -57,24 +58,42 @@ export default function DiscoverPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold mb-2" data-testid="text-discover-title">Discover</h1>
+    <motion.div 
+      className="max-w-6xl mx-auto px-6 py-8 space-y-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1 className="text-4xl font-heading font-bold mb-2" data-testid="text-discover-title">Discover</h1>
         <p className="text-lg text-muted-foreground">
           Explore curated financial topics and trending insights
         </p>
-      </div>
+      </motion.div>
 
-      {topics.map((section) => (
-        <div key={section.category}>
-          <h2 className="text-2xl font-semibold mb-4" data-testid={`text-category-${section.category.toLowerCase()}`}>
+      {topics.map((section, sectionIndex) => (
+        <motion.div 
+          key={section.category}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 + sectionIndex * 0.1 }}
+        >
+          <h2 className="text-2xl font-heading font-semibold mb-4" data-testid={`text-category-${section.category.toLowerCase()}`}>
             {section.category}
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             {section.items.map((item, idx) => (
-              <Card
+              <motion.div
                 key={idx}
-                className="p-6 hover-elevate active-elevate-2 cursor-pointer transition-transform"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Card
+                className="p-6 hover-elevate active-elevate-2 cursor-pointer h-full"
                 onClick={() => handleTopicClick(item.title)}
                 data-testid={`card-topic-${idx}`}
               >
@@ -92,11 +111,12 @@ export default function DiscoverPage() {
                     <p className="text-muted-foreground">{item.description}</p>
                   </div>
                 </div>
-              </Card>
+                </Card>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

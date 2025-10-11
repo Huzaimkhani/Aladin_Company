@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 // TODO: remove mock functionality
 const plans = [
@@ -63,19 +64,35 @@ export default function PaymentPlans() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4" data-testid="text-plans-title">Choose Your Plan</h1>
+    <motion.div 
+      className="max-w-6xl mx-auto px-6 py-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div 
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-4xl font-heading font-bold mb-4" data-testid="text-plans-title">Choose Your Plan</h1>
         <p className="text-lg text-muted-foreground">
           Unlock more insights with our flexible pricing options
         </p>
-      </div>
+      </motion.div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {plans.map((plan) => (
-          <Card
+        {plans.map((plan, index) => (
+          <motion.div
             key={plan.name}
-            className={`p-6 flex flex-col relative ${
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <Card
+            className={`p-6 flex flex-col relative h-full ${
               plan.popular ? 'border-primary shadow-lg' : ''
             }`}
             data-testid={`card-plan-${plan.name.toLowerCase()}`}
@@ -121,14 +138,20 @@ export default function PaymentPlans() {
             >
               {plan.cta}
             </Button>
-          </Card>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
-      <div className="mt-12 text-center text-sm text-muted-foreground">
+      <motion.div 
+        className="mt-12 text-center text-sm text-muted-foreground"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
         <p>All plans include access to our AI-powered financial insights</p>
         <p className="mt-2">Payments processed securely via Stripe or Solana Pay</p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

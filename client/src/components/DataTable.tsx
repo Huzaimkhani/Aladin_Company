@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { motion } from "framer-motion";
 
 interface DataItem {
   symbol: string;
@@ -50,10 +51,20 @@ export default function DataTable({ title, data }: DataTableProps) {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold" data-testid="text-table-title">{title}</h1>
-      </div>
+    <motion.div 
+      className="space-y-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1 className="text-3xl font-heading font-bold" data-testid="text-table-title">{title}</h1>
+      </motion.div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -140,6 +151,6 @@ export default function DataTable({ title, data }: DataTableProps) {
         <p>Showing {filteredData.length} of {data.length} items</p>
         <p>Updated: Just now</p>
       </div>
-    </div>
+    </motion.div>
   );
 }

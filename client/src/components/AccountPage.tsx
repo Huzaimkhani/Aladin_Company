@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Clock, Crown, LogOut } from "lucide-react";
+import { motion } from "framer-motion";
 
 // TODO: remove mock functionality
 const searchHistory = [
@@ -41,16 +42,31 @@ export default function AccountPage({
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold" data-testid="text-account-title">Account Dashboard</h1>
+    <motion.div 
+      className="max-w-5xl mx-auto px-6 py-8 space-y-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1 className="text-3xl font-heading font-bold" data-testid="text-account-title">Account Dashboard</h1>
         <Button variant="outline" onClick={handleLogout} data-testid="button-logout">
           <LogOut className="w-4 h-4 mr-2" />
           Logout
         </Button>
-      </div>
+      </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <motion.div 
+        className="grid md:grid-cols-3 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -89,10 +105,15 @@ export default function AccountPage({
             Upgrade Plan →
           </Button>
         </Card>
-      </div>
+      </motion.div>
 
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Search History</h2>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <Card className="p-6">
+          <h2 className="text-xl font-heading font-semibold mb-4">Search History</h2>
         <div className="space-y-3">
           {searchHistory.map((item) => (
             <div
@@ -125,7 +146,8 @@ export default function AccountPage({
             </div>
           ))}
         </div>
-      </Card>
-    </div>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

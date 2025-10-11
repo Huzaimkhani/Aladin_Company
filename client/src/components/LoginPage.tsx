@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { SiGoogle, SiGithub } from "react-icons/si";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,11 +22,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-brand flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-2" data-testid="text-logo">Aladin.AI</h1>
+      <motion.div 
+        className="w-full max-w-md"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <h1 className="text-5xl font-heading font-bold text-white mb-2" data-testid="text-logo">Aladin.AI</h1>
           <p className="text-white/80 text-lg">AI-Powered Financial Research</p>
-        </div>
+        </motion.div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
@@ -128,7 +139,7 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

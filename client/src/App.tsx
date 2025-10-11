@@ -14,6 +14,7 @@ import Library from "@/pages/library";
 import Account from "@/pages/account";
 import Plans from "@/pages/plans";
 import Search from "@/pages/search";
+import Settings from "@/pages/settings";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/account" component={Account} />
       <Route path="/plans" component={Plans} />
       <Route path="/search" component={Search} />
+      <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );

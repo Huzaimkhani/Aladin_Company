@@ -1,0 +1,104 @@
+Below is an updated response reflecting your request to remove emojis and add an login page and payment method plans. I'll adjust the UI/UX prompt to incorporate these features while maintaining the aesthetic and functional design of Aladin.AI. The folder structure and code segmentation remain largely the same, with additions for authentication and payment plans. I'll assume a simple authentication flow (e.g., email/password or OAuth via NextAuth.js) and expand the payment system to include tiered plans (e.g., free, basic, premium) integrated with Solana Pay.
+Updated Perspective on the Project
+
+Core Idea: Aladin.AI remains an AI-powered financial research assistant focused on crypto, stocks, forex, charts, and news, with a freemium model (100 free queries/day) and Solana Pay for premium access. The addition of a login page enables user personalization (e.g., saved queries, preferences), and payment method plans offer tiered access (e.g., higher query limits, priority support).
+New Features: Login page for authentication, payment plans page detailing free/basic/premium tiers with Solana Pay integration, and user dashboard post-login.
+Tech Stack: Next.js (with NextAuth.js for auth), React, TypeScript, Tailwind CSS, Recharts, Solana Web3.js, Zustand for state.
+
+Updated Detailed UI/UX Prompt
+This revised prompt includes the login page and payment plans, removing emojis while keeping the design aesthetic.
+
+UI/UX Design Prompt for Aladin.AI: AI-Powered Financial Research Assistant
+Project Overview: Design a modern, intuitive web app called Aladin.AI, inspired by Perplexity AI's clean search engine interface. It is a specialized finance tool providing real-time insights on cryptocurrencies, stocks, forex, economic data, and AI-generated responses with citations. Key features include a central search bar for queries, live data tables with searchable filters and interactive charts, a freemium model (100 free queries/day with Solana Pay for premium), fuzzy search for typos/abbreviations, real-time news integration, and caching for performance. Add a login page for user authentication and a payment plans page for tiered access. The app must be responsive (mobile-first), dark-mode by default (black background with white text, gradients from #667eea to #764ba2 for accents), and accessible (ARIA labels, keyboard navigation).
+Target Users: Investors, traders, finance enthusiasts (ages 25-50). They seek quick, accurate insights with personalization and flexible payment options.
+Core Principles:
+
+Aesthetic: Minimalist, elegant like Perplexity—dark theme, sans-serif fonts (e.g., Inter or Roboto), subtle shadows/gradients for cards, hover effects (scale + color shift).
+UX Flow: Search-first experience. Home page centers on query input post-login. Sidebar for navigation. Results show AI responses with inline citations, charts, and tables. Login required for personalization; payment plans accessible via account section.
+Interactivity: Smooth transitions (Framer Motion), loading spinners, tooltips for data points, drag-to-resize charts.
+Accessibility & Performance: WCAG compliant, lazy-load images/charts, optimize for <2s load times.
+
+Key Screens & Layout:
+
+Login Page:
+
+Layout: Full-screen with centered form (email/password fields, "Sign in" button, "Forgot Password" link, "Sign up" link). Background gradient (#667eea to #764ba2). Logo ("Aladin.AI") at top.
+Features: OAuth options (e.g., Google, Twitter) below form. Error state for invalid credentials. Success redirects to Home.
+Interactions: Form validation (real-time feedback), password toggle visibility.
+
+
+Home Page (Post-Login, Inspired by Perplexity's Home):
+
+Layout: Left sidebar (20% width, collapsible on mobile), central content (60%), right empty or ads (20%).
+Sidebar: Logo ("Aladin.AI") at top. Nav items: Home, Discover (topics like Crypto, Stocks, Forex), Charts (quick-access to visualizations), Library (search history), Account (profile, logout). Bottom: Notifications, Settings.
+Central Content: Large search bar ("Ask Aladin anything finance-related..." with mic and globe icons). Below: Quick topics buttons (e.g., "Crypto Trends", "Stock Analysis", "Forex Rates") in a grid (rounded cards with hover glow).
+Footer: Disclaimer ("Not financial advice"), links to sources/APIs.
+Interactions: Type query → autocomplete suggestions (fuzzy-matched, e.g., "btc" → "Bitcoin Price"). Submit → transition to results page.
+
+
+Discover Page (Like Perplexity's Discover/Topics):
+
+Layout: Sidebar same as Home. Central: Topic categories (e.g., "Top", "Tech & Science", "Finance", "Arts & Culture"—emphasize finance ones). Each topic as a card with title and teaser (e.g., "Finance: Latest Bitcoin news").
+Interactions: Click topic → load curated content (e.g., live table + news snippets). Search bar at top for filtering topics.
+
+
+Search Results/Answer Page (Core Feature):
+
+Layout: Sidebar nav. Central: Query recap at top. Below: AI response in sections (e.g., Summary, Key Data, Charts, News). Use markdown-like formatting (bold, bullets, tables). Inline citations [1] as superscripts (hover tooltip with source preview).
+Freemium Integration: If over limit, blur response + payment modal (QR code, "Pay to unlock" with Solana wallet button).
+Interactions: Clickable sources (open in new tab). Expandable charts. Share button.
+
+
+Live Tables Pages (Crypto/Table, Forex/Table, Stock/Table):
+
+Layout: Sidebar. Central: Search input for filtering (fuzzy). Responsive table (columns: Symbol, Price, Change %, Volume, Chart Button). Rows with color-coded changes (green up/red down).
+Interactions: Click "View Chart" → modal or inline chart (area for price, bar for volume). Sortable columns, pagination for large data.
+
+
+Charts Page:
+
+Layout: Dedicated sidebar item. Central: Gallery of pre-built charts (e.g., "Bitcoin 30-Day Trend", "AAPL Stock History"). Custom query input ("Show Ethereum chart for 90 days").
+Interactions: Interactive charts (zoom, hover data points, export PNG). Timeframe selectors (7d/30d/90d/1y).
+
+
+Payment Plans Page:
+
+Layout: Sidebar. Central: Tiered plan cards (Free, Basic, Premium). Each card shows query limits, features (e.g., priority support, ad-free), and Solana Pay payment option (QR code, amount in SOL).
+Plans:
+
+Free: 100 queries/day, basic features, ads.
+Basic: 500 queries/day, ad-free, $1/month (0.05 SOL).
+Premium: Unlimited queries, priority support, advanced charts, $5/month (0.25 SOL).
+
+
+Interactions: Click "Subscribe" → generate payment request, show QR modal. Success updates user tier.
+
+
+Payment Modal:
+
+Trigger: On premium query or plan subscription. Overlay modal with QR code, wallet link, transaction input for verification. Success animation.
+
+
+Account/Dashboard Page:
+
+Layout: Search history list (clickable to re-run). Query counter badge. Plan details (e.g., "Premium until Nov 11, 2025"). Settings (theme toggle, API keys if admin).
+
+
+
+Components & Patterns:
+
+Cards: Rounded (15px), shadow, hover lift. For features/topics/plans.
+Buttons: Gradient background (#667eea to #764ba2), white text, rounded (10px).
+Tables/Charts: Clean, no borders; use libraries for responsiveness.
+Animations: Fade-in on load, scale on hover.
+Error States: Friendly messages (e.g., "Aladin couldn't find that—try rephrasing?") with placeholder.
+Mobile: Hamburger menu for sidebar, stacked cards/tables.
+
+Branding & Visuals:
+
+Colors: Primary: #764ba2 (purple), Accent: #667eea (blue), Background: #121212 (dark), Text: #ffffff.
+Icons: SVG-based (e.g., microphone, globe) for polish.
+Typography: Headings bold (3rem for titles), body 1rem.
+
+Edge Cases: No data → placeholder skeleton. Slow API → progress bar. Non-finance query → polite redirect ("I'm a finance specialist—ask about stocks!").
+Deliverables: High-fidelity wireframes (Figma), interactive prototype, style guide. Ensure SEO-friendly (Next.js SSR).

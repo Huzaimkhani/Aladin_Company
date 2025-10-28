@@ -4,13 +4,14 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Tuple
 import json
-from ..config import config
-from .cache_service import cache
+from config import settings as config
+from services.cache_service import cache
 
 class FinanceService:
     def __init__(self):
         self.coingecko_base = config.COINGECKO_API
         self.alpha_vantage_key = config.ALPHA_VANTAGE_KEY
+        self.alpha_vantage_forex_key = config.ALPHA_VANTAGE_FOREX_KEY
         self.finnhub_key = config.FINNHUB_KEY
 
     async def get_comprehensive_market_data(self) -> Dict:
@@ -186,23 +187,78 @@ class FinanceService:
         if cached:
             return cached
 
-        # Simplified forex implementation
+        forex_data = []
+        pairs = ['USD/EUR', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY']
+        
         try:
-            # Using a free forex API or creating mock data
-            forex_data = [
-                {'pair': 'EUR/USD', 'price': 1.0950, 'change': 0.0020},
-                {'pair': 'GBP/USD', 'price': 1.2750, 'change': -0.0015},
-                {'pair': 'USD/JPY', 'price': 145.20, 'change': 0.3000},
-                {'pair': 'USD/CAD', 'price': 1.3400, 'change': -0.0010},
-                {'pair': 'AUD/USD', 'price': 0.6680, 'change': 0.0030},
-            ]
-            
-            await cache.set(cache_key, forex_data, ttl=300)
+            async with aiohttp.ClientSession() as session:
+                tasks = []
+                for pair in pairs:
+                    from_currency, to_currency = pair.split('/')
+                    url = "https://www.alphavantage.co/query"
+                    params = {
+                        'function': 'CURRENCY_EXCHANGE_RATE',
+                        'from_currency': from_currency,
+                        'to_currency': to_currency,
+                        'apikey': self.alpha_vantage_forex_key
+                    }
+                    tasks.append(self._fetch_forex_pair(session, url, params, pair))
+                
+                results = await asyncio.gather(*tasks)
+                forex_data = [res for res in results if res]
+
+            if forex_data:
+                await cache.set(cache_key, forex_data, ttl=300)
             return forex_data
-            
+
         except Exception as e:
             print(f"Error fetching forex data: {e}")
             return []
+
+    async def _fetch_forex_pair(self, session: aiohttp.ClientSession, url: str, params: Dict, pair: str) -> Optional[Dict]:
+        try:
+            async with session.get(url, params=params, timeout=10) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if 'Realtime Currency Exchange Rate' in data:
+                        rate = data['Realtime Currency Exchange Rate']
+                        return {
+                            'pair': pair,
+                            'price': float(rate.get('5. Exchange Rate', 0)),
+                            'change': 0  # Alpha Vantage realtime does not provide change
+                        }
+        except Exception as e:
+            print(f"Could not process forex data for {pair}: {e}")
+        return None
+
+    async def get_economic_data(self, series_id: str = "GDP") -> Optional[Dict]:
+        """Get economic data from FRED API"""
+        cache_key = f"fred_{series_id}"
+        cached = await cache.get(cache_key)
+        if cached:
+            return cached
+        
+        url = "https://api.stlouisfed.org/fred/series/observations"
+        params = {'series_id': series_id, 'api_key': config.FRED_API_KEY, 'file_type': 'json', 'limit': 1, 'sort_order': 'desc'}
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, timeout=10) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        if 'observations' in data and len(data['observations']) > 0:
+                            latest = data['observations'][0]
+                            result = {
+                                'series_id': series_id,
+                                'date': latest.get('date', ''),
+                                'value': latest.get('value', '')
+                            }
+                            await cache.set(cache_key, result, ttl=3600) # Cache for 1 hour
+                            return result
+        except Exception as e:
+            print(f"Error fetching economic data from FRED: {e}")
+        
+        return None
 
     async def get_bitcoin_price(self) -> Dict:
         """Get real-time Bitcoin price"""

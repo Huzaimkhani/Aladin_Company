@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from ..services.finance_service import FinanceService
+from services.finance_service import FinanceService
 
 router = APIRouter()
 finance_service = FinanceService()

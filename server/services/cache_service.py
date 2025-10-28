@@ -6,10 +6,11 @@ class CacheService:
     def __init__(self):
         self._cache = {}
         self._timestamps = {}
+        self._ttls = {}
 
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache"""
-        if key in self._cache and await self._is_valid(key):
+        if key in self._cache and self._is_valid(key):
             return self._cache[key]
         return None
 
@@ -17,6 +18,7 @@ class CacheService:
         """Set value in cache with TTL"""
         self._cache[key] = value
         self._timestamps[key] = datetime.now()
+        self._ttls[key] = ttl
 
     async def delete(self, key: str) -> None:
         """Delete value from cache"""
@@ -27,15 +29,17 @@ class CacheService:
         """Clear all cache"""
         self._cache.clear()
         self._timestamps.clear()
+        self._ttls.clear()
 
-    async def _is_valid(self, key: str) -> bool:
+    def _is_valid(self, key: str) -> bool:
         """Check if cache entry is still valid"""
         if key not in self._timestamps:
             return False
         
         cache_time = self._timestamps[key]
         current_time = datetime.now()
-        return (current_time - cache_time).seconds < 300  # Default 5 minutes
+        ttl = self._ttls.get(key, 300) # Default 5 minutes
+        return (current_time - cache_time).total_seconds() < ttl
 
 # Global cache instance
 cache = CacheService()

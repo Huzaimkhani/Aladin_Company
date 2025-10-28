@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from ..services.ai_service import AIService
-from ..models.schemas import FinanceQuery, AIResponse
+from services.ai_service import AIService
+from models.schemas import FinanceQuery, AIResponse
 
 router = APIRouter()
 ai_service = AIService()

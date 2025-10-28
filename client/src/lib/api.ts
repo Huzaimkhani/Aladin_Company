@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface SearchResponse {
   summary: string;
@@ -64,7 +64,8 @@ class ApiClient {
 
   // Crypto endpoints
   async getCryptoData(limit: number = 100): Promise<CryptoData[]> {
-    return this.request(`/crypto/data?limit=${limit}`);
+    const response = await this.request(`/crypto/list?limit=${limit}`);
+    return response.data; // The data is nested under the 'data' key
   }
 
   async getBitcoinPrice(): Promise<BitcoinPrice> {

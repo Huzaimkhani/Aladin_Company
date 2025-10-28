@@ -3,9 +3,9 @@ import json
 import time
 from typing import List, Dict
 from datetime import datetime
-from ..config import config
-from .finance_service import FinanceService
-from .cache_service import cache
+from config import settings as config
+from services.finance_service import FinanceService
+from services.cache_service import cache
 
 class AIService:
     def __init__(self):

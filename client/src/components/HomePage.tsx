@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, MessageSquare, BarChart, CandlestickChart, Landmark } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { MarketData } from "../../../server/shared/types";
 
 const quickTopics = [
   {
@@ -15,22 +17,22 @@ const quickTopics = [
     view: "ask",
   },
   {
-    title: "Live Crypto Table",
+    title: "Crypto Market",
     description: "Live cryptocurrency data & insights",
     icon: BarChart,
-    view: "crypto_table",
+    view: "markets/crypto",
   },
   {
-    title: "Live Stock Table",
+    title: "Stock Market",
     description: "Real-time stock market data",
     icon: CandlestickChart,
-    view: "stock_table",
+    view: "markets/stocks",
   },
   {
-    title: "Live Forex Table",
+    title: "Forex Market",
     description: "Major foreign exchange rates",
     icon: Landmark,
-    view: "forex_table",
+    view: "markets/forex",
   },
 ];
 
@@ -38,6 +40,15 @@ interface HomePageProps {
   queriesUsed?: number;
   queriesLimit?: number;
 }
+
+const fetchMarketData = async (): Promise<MarketData> => {
+  const response = await fetch("/api/market-data");
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  const data = await response.json();
+  return data;
+};
 
 export default function HomePage({ queriesUsed = 47, queriesLimit = 100 }: HomePageProps) {
   const handleSearch = (e: React.FormEvent) => {
@@ -55,6 +66,12 @@ export default function HomePage({ queriesUsed = 47, queriesLimit = 100 }: HomeP
 
   const [query, setQuery] = useState("");
   const [, setLocation] = useLocation(); // wouter hook for navigation
+
+  const { data: marketData, isLoading, isError } = useQuery<MarketData>({
+    queryKey: ['marketData'],
+    queryFn: fetchMarketData,
+    refetchInterval: 15000, // Refetch every 15 seconds
+  });
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 -mt-16">
@@ -98,7 +115,7 @@ export default function HomePage({ queriesUsed = 47, queriesLimit = 100 }: HomeP
         </Card>
 
         <div>
-          <h3 className="text-2xl font-heading font-semibold text-center mb-6">Or Explore Markets Directly</h3>
+          <h3 className="text-2xl font-heading font-semibold text-center mb-6">Or Explore Live Markets</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickTopics.map((topic, index) => (
             <motion.div
@@ -122,6 +139,24 @@ export default function HomePage({ queriesUsed = 47, queriesLimit = 100 }: HomeP
           ))}
         </div>
         </div>
+
+        {isLoading && <div className="text-center p-8">Loading market data...</div>}
+        {isError && <div className="text-center p-8 text-red-500">Failed to load market data. Please try again later.</div>}
+
+        {marketData && (
+          <div className="space-y-8">
+            {/* 
+              Assuming you have components like CryptoTable, StockTable, and ForexTable
+              that can accept data as props. You would pass the live data like this.
+              These components would be rendered on their respective routes.
+              For this example, I'm showing how you'd pass data if they were on this page.
+              
+              e.g. on the /markets/crypto page:
+              <CryptoTable data={marketData.crypto} />
+            */}
+          </div>
+        )}
+
       </div>
     </div>
   );

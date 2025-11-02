@@ -1,4 +1,4 @@
-import { Home, TrendingUp, BarChart3, Library, User, Settings } from "lucide-react";
+import { Home, TrendingUp, BarChart3, LineChart, User, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +17,7 @@ const menuItems = [
   { title: "Home", icon: Home, url: "/", testId: "nav-home" },
   { title: "Discover", icon: TrendingUp, url: "/discover", testId: "nav-discover" },
   { title: "Charts", icon: BarChart3, url: "/charts", testId: "nav-charts" },
-  { title: "Library", icon: Library, url: "/library", testId: "nav-library" },
+  { title: "Markets", icon: LineChart, url: "/markets", testId: "nav-markets" },
   { title: "Account", icon: User, url: "/account", testId: "nav-account" },
 ];
 

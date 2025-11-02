@@ -6,13 +6,18 @@ from typing import List, Dict, Optional, Tuple
 import json
 from config import settings as config
 from services.cache_service import cache
+from alpha_vantage.timeseries import TimeSeries
+import os
+import requests
 
 class FinanceService:
     def __init__(self):
         self.coingecko_base = config.COINGECKO_API
         self.alpha_vantage_key = config.ALPHA_VANTAGE_KEY
+        self.coingecko_key = config.COINGECKO_KEY
         self.alpha_vantage_forex_key = config.ALPHA_VANTAGE_FOREX_KEY
         self.finnhub_key = config.FINNHUB_KEY
+        self.alpha_vantage_stock_key = config.ALPHA_VANTAGE_STOCK_KEY
 
     async def get_comprehensive_market_data(self) -> Dict:
         """Get all market data in parallel"""
@@ -58,7 +63,8 @@ class FinanceService:
                     'per_page': limit,
                     'page': 1,
                     'sparkline': 'false',
-                    'price_change_percentage': '24h'
+                    'price_change_percentage': '24h',
+                    'x_cg_demo_api_key': self.coingecko_key
                 }
                 
                 async with session.get(url, params=params, timeout=10) as response:
@@ -99,7 +105,8 @@ class FinanceService:
                 params = {
                     'vs_currency': 'usd',
                     'days': str(days),
-                    'interval': 'daily' if days > 90 else 'hourly'
+                    'interval': 'daily' if days > 90 else 'hourly',
+                    'x_cg_demo_api_key': self.coingecko_key
                 }
                 
                 async with session.get(url, params=params, timeout=10) as response:
@@ -148,34 +155,28 @@ class FinanceService:
             return []
 
     async def get_stock_quote(self, symbol: str) -> Optional[Dict]:
-        """Get individual stock quote from Alpha Vantage"""
+        """Get individual stock quote using Alpha Vantage"""
         try:
-            async with aiohttp.ClientSession() as session:
-                url = "https://www.alphavantage.co/query"
-                params = {
-                    'function': 'GLOBAL_QUOTE',
-                    'symbol': symbol,
-                    'apikey': self.alpha_vantage_key
+            url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={self.alpha_vantage_stock_key}"
+            response = requests.get(url)
+            data = response.json()
+
+            if "Global Quote" in data:
+                quote = data["Global Quote"]
+                return {
+                    "symbol": symbol,
+                    "price": float(quote.get("05. price", 0)),
+                    "volume": int(quote.get("06. volume", 0)),
+                    "change": float(quote.get("09. change", 0)),
+                    "change_percent": quote.get("10. change percent", "0%").replace("%", ""),
+                    "high": float(quote.get("03. high", 0)),
+                    "low": float(quote.get("04. low", 0)),
+                    "open": float(quote.get("02. open", 0)),
                 }
-                
-                async with session.get(url, params=params, timeout=10) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        
-                        if 'Global Quote' in data:
-                            quote = data['Global Quote']
-                            return {
-                                'symbol': symbol,
-                                'price': float(quote.get('05. price', 0)),
-                                'change': float(quote.get('09. change', 0)),
-                                'change_percent': quote.get('10. change percent', '0%').replace('%', ''),
-                                'volume': int(quote.get('06. volume', 0)),
-                                'high': float(quote.get('03. high', 0)),
-                                'low': float(quote.get('04. low', 0)),
-                                'open': float(quote.get('02. open', 0))
-                            }
-                    return None
-                    
+            else:
+                print(f"Error: Could not fetch {symbol} stock data.")
+                return None
+
         except Exception as e:
             print(f"Error fetching stock {symbol}: {e}")
             return None
@@ -275,7 +276,8 @@ class FinanceService:
                     'vs_currencies': 'usd',
                     'include_24hr_change': 'true',
                     'include_24hr_vol': 'true',
-                    'include_market_cap': 'true'
+                    'include_market_cap': 'true',
+                    'x_cg_demo_api_key': self.coingecko_key
                 }
                 
                 async with session.get(url, params=params, timeout=5) as response:
@@ -296,3 +298,18 @@ class FinanceService:
         except Exception as e:
             print(f"Error fetching Bitcoin price: {e}")
             return {}
+
+    async def search_stock(self, query: str) -> List[Dict]:
+        """Search stocks by symbol or name"""
+        try:
+            # Example implementation for searching stocks
+            # You can extend this to fetch a list of stocks from an API or database
+            all_stocks = await self.get_live_stock_data()
+            query_lower = query.lower()
+            return [
+                stock for stock in all_stocks
+                if query_lower in stock['symbol'].lower() or query_lower in stock.get('name', '').lower()
+            ]
+        except Exception as e:
+            print(f"Error searching stocks: {e}")
+            return []

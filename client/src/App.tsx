@@ -10,12 +10,11 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Discover from "@/pages/discover";
 import Charts from "@/pages/charts";
-import Library from "@/pages/library";
+import Markets from "@/pages/markets";
 import Account from "@/pages/account";
 import Plans from "@/pages/plans";
 import Search from "@/pages/search";
 import Settings from "@/pages/settings";
-import CryptoTablePage from "@/pages/crypto_table";
 
 function Router() {
   return (
@@ -24,12 +23,11 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/discover" component={Discover} />
       <Route path="/charts" component={Charts} />
-      <Route path="/library" component={Library} />
+      <Route path="/markets" component={Markets} />
       <Route path="/account" component={Account} />
       <Route path="/plans" component={Plans} />
       <Route path="/search" component={Search} />
       <Route path="/settings" component={Settings} />
-      <Route path="/crypto_table" component={CryptoTablePage} />
       <Route component={NotFound} />
     </Switch>
   );

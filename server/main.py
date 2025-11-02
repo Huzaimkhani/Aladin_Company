@@ -1,13 +1,13 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 from dotenv import load_dotenv
 
-from routers import finance, crypto, stocks, ai, charts
-from config import settings
+# Import routers
+from routers import finance, crypto, stocks, ai
 
 load_dotenv()
 
@@ -17,10 +17,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - CRITICAL FIX
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],  # Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,20 +31,33 @@ app.include_router(finance.router, prefix="/api/finance", tags=["finance"])
 app.include_router(crypto.router, prefix="/api/crypto", tags=["crypto"])
 app.include_router(stocks.router, prefix="/api/stocks", tags=["stocks"])
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
-app.include_router(charts.router, prefix="/api/charts", tags=["charts"])
 
 @app.get("/")
 async def root():
-    return {"message": "Aladin.AI Finance API", "status": "running"}
+    return {
+        "message": "Aladin.AI Finance API", 
+        "status": "running",
+        "timestamp": datetime.now().isoformat()
+    }
 
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    return {
+        "status": "healthy", 
+        "timestamp": datetime.now().isoformat(),
+        "endpoints": {
+            "crypto": "/api/crypto/list",
+            "stocks": "/api/stocks/list",
+            "forex": "/api/finance/market-data"
+        }
+    }
 
 if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True
+        port=port,
+        reload=True,
+        log_level="info"
     )

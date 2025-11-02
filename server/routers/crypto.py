@@ -1,4 +1,11 @@
 from fastapi import APIRouter, HTTPException, Query
+from typing import List, Dict
+import sys
+import os
+
+# Add parent directory to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from services.finance_service import FinanceService
 
 router = APIRouter()
@@ -9,9 +16,22 @@ async def get_crypto_list(
     limit: int = Query(100, ge=1, le=250),
     page: int = Query(1, ge=1)
 ):
-    """Get cryptocurrency list"""
+    """Get cryptocurrency list with real-time data"""
     try:
+        print(f"[CRYPTO] Fetching crypto data with limit={limit}")
         crypto_data = await finance_service.get_live_crypto_data(limit)
+        
+        if not crypto_data:
+            print("[CRYPTO] No data returned from CoinGecko")
+            return {
+                "data": [],
+                "count": 0,
+                "limit": limit,
+                "page": page,
+                "message": "No crypto data available"
+            }
+        
+        print(f"[CRYPTO] Successfully fetched {len(crypto_data)} cryptocurrencies")
         return {
             "data": crypto_data,
             "count": len(crypto_data),
@@ -19,7 +39,11 @@ async def get_crypto_list(
             "page": page
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch crypto data: {str(e)}")
+        print(f"[CRYPTO] Error: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to fetch crypto data: {str(e)}"
+        )
 
 @router.get("/{symbol}")
 async def get_crypto_by_symbol(symbol: str):
@@ -32,8 +56,14 @@ async def get_crypto_by_symbol(symbol: str):
             if crypto['symbol'] == symbol_upper:
                 return crypto
         
-        raise HTTPException(status_code=404, detail=f"Cryptocurrency {symbol} not found")
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Cryptocurrency {symbol} not found"
+        )
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch crypto data: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to fetch crypto data: {str(e)}"
+        )

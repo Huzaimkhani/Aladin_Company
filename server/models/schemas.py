@@ -54,3 +54,20 @@ class APIStatus(BaseModel):
     message: str
     version: str
     timestamp: datetime
+
+
+    """
+class LiveChartData(BaseModel):
+    prices: List[List[float]]
+    market_caps: List[List[float]]
+    total_volumes: List[List[float]]
+    coin_id: str
+    days: int
+    last_updated: str
+    current_price: Optional[float] = None
+    change_24h: Optional[float] = None
+
+class MultiChartResponse(BaseModel):
+    charts: Dict[str, Any]
+    timestamp: str
+"""

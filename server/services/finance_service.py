@@ -4,7 +4,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Tuple
 import json
+import time
 from config import settings as config
+from collections import deque
 from services.cache_service import cache
 from alpha_vantage.timeseries import TimeSeries
 import os
@@ -18,7 +20,21 @@ class FinanceService:
         self.alpha_vantage_forex_key = config.ALPHA_VANTAGE_FOREX_KEY
         self.finnhub_key = config.FINNHUB_KEY
         self.alpha_vantage_stock_key = config.ALPHA_VANTAGE_STOCK_KEY
+        self.api_call_times = deque(maxlen=30)
+        self.rate_limit_lock = asyncio.Lock()
 
+    async def _respect_rate_limit(self):  
+        """Ensure we don't exceed 30 calls/minute"""
+        async with self.rate_limit_lock:
+            now = time.time()
+            while self.api_call_times and self.api_call_times[0] < now - 60:
+                self.api_call_times.popleft()
+            if len(self.api_call_times) >= 30:
+                sleep_time = 61 - (now - self.api_call_times[0])
+                if sleep_time > 0:
+                    await asyncio.sleep(sleep_time)
+            self.api_call_times.append(now)
+ 
     async def get_comprehensive_market_data(self) -> Dict:
         """Get all market data in parallel"""
         try:
@@ -55,6 +71,7 @@ class FinanceService:
             return cached
 
         try:
+            await self._respect_rate_limit() 
             async with aiohttp.ClientSession() as session:
                 url = f"{self.coingecko_base}/coins/markets"
                 params = {
@@ -73,13 +90,15 @@ class FinanceService:
                         crypto_data = []
                         for item in data:
                             crypto_data.append({
+                                'id': item['id'],
                                 'symbol': item['symbol'].upper(),
                                 'name': item['name'],
                                 'price': item['current_price'],
                                 'price_chg': item.get('price_change_percentage_24h', 0),
                                 'volume_24h': item.get('total_volume', 0),
                                 'market_cap': item.get('market_cap', 0),
-                                'market_cap_rank': item.get('market_cap_rank')
+                                'market_cap_rank': item.get('market_cap_rank'),
+                                'image': item.get('image', '') 
                             })
                         
                         await cache.set(cache_key, crypto_data, ttl=300)
@@ -94,39 +113,70 @@ class FinanceService:
 
     async def get_crypto_chart_data(self, coin_id: str, days: int = 30) -> Dict:
         """Get cryptocurrency chart data"""
+        
+        # Dynamic cache TTL based on timeframe
+        if days == 1:
+            cache_ttl = 60      # 1 minute for 24h charts
+        elif days <= 7:
+            cache_ttl = 300     # 5 minutes for weekly charts
+        elif days <= 30:
+            cache_ttl = 900     # 15 minutes for monthly charts
+        else:
+            cache_ttl = 1800    # 30 minutes for longer periods
+        
         cache_key = f"crypto_chart_{coin_id}_{days}"
         cached = await cache.get(cache_key)
         if cached:
+            print(f"✅ Cache hit for {coin_id} ({days}d)")
             return cached
 
         try:
+            await self._respect_rate_limit()
+            
             async with aiohttp.ClientSession() as session:
                 url = f"{self.coingecko_base}/coins/{coin_id}/market_chart"
+                
+                # FIX: CoinGecko doesn't accept 'interval' parameter with 'days' parameter
+                # It automatically chooses the best interval based on days
                 params = {
                     'vs_currency': 'usd',
                     'days': str(days),
-                    'interval': 'daily' if days > 90 else 'hourly',
                     'x_cg_demo_api_key': self.coingecko_key
                 }
+                
+                print(f"🔍 Fetching chart: {coin_id}, days={days}")
                 
                 async with session.get(url, params=params, timeout=10) as response:
                     if response.status == 200:
                         data = await response.json()
+                        
+                        prices = data.get('prices', [])
+                        print(f"📊 API returned {len(prices)} price points for {coin_id}")
+                        
+                        if not prices or len(prices) == 0:
+                            print(f"⚠️  WARNING: No price data returned for {coin_id}")
+                            return {}
+                        
                         chart_data = {
-                            'prices': data.get('prices', []),
+                            'prices': prices,
                             'market_caps': data.get('market_caps', []),
                             'total_volumes': data.get('total_volumes', []),
                             'coin_id': coin_id,
-                            'days': days
+                            'days': days,
+                            'last_updated': datetime.now().isoformat()
                         }
-                        await cache.set(cache_key, chart_data, ttl=60)
+                        await cache.set(cache_key, chart_data, ttl=cache_ttl)
+                        print(f"✅ Successfully cached {len(prices)} points for {coin_id}")
                         return chart_data
                     else:
-                        print(f"Chart API error: {response.status}")
+                        error_text = await response.text()
+                        print(f"❌ Chart API error {response.status}: {error_text}")
                         return {}
                         
         except Exception as e:
-            print(f"Error fetching crypto chart: {e}")
+            print(f"❌ Error fetching crypto chart: {e}")
+            import traceback
+            traceback.print_exc()
             return {}
 
     async def get_live_stock_data(self) -> List[Dict]:
@@ -313,3 +363,48 @@ class FinanceService:
         except Exception as e:
             print(f"Error searching stocks: {e}")
             return []
+    
+    async def get_live_chart_with_current_price(self, coin_id: str, days: int = 7) -> Dict:
+        """Get chart data + append latest live price for real-time feel"""
+        try:
+            # Get historical chart data
+            chart_data = await self.get_crypto_chart_data(coin_id, days)
+            
+            if not chart_data or not chart_data.get('prices'):
+                print(f"⚠️  No chart data returned for {coin_id}")
+                return {}
+            
+            print(f"📈 Got {len(chart_data.get('prices', []))} price points for {coin_id}")
+            
+            # Get current live price to append
+            await self._respect_rate_limit()
+            
+            async with aiohttp.ClientSession() as session:
+                url = f"{self.coingecko_base}/simple/price"
+                params = {
+                    'ids': coin_id,
+                    'vs_currencies': 'usd',
+                    'include_24hr_change': 'true',
+                    'include_24hr_vol': 'true',
+                    'include_market_cap': 'true',
+                    'x_cg_demo_api_key': self.coingecko_key  # ADD THIS LINE
+                }
+                async with session.get(url, params=params, timeout=5) as response:
+                    if response.status == 200:
+                        price_data = await response.json()
+                        if coin_id in price_data:
+                            current_price = price_data[coin_id]['usd']
+                            current_time = int(time.time() * 1000)
+
+                            # Append current price as latest data point
+                            chart_data['prices'].append([current_time, current_price])
+                            chart_data['current_price'] = current_price
+                            chart_data['change_24h'] = price_data[coin_id].get('usd_24h_change', 0)
+                            chart_data['volume_24h'] = price_data[coin_id].get('usd_24h_vol', 0)
+                            chart_data['market_cap'] = price_data[coin_id].get('usd_market_cap', 0)
+                
+                return chart_data
+
+        except Exception as e:
+            print(f"Error fetching live chart: {e}")
+            return {}

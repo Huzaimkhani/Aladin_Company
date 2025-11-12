@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 
 # Import routers
-from routers import finance, crypto, stocks, ai
+from routers import finance, crypto, stocks, ai, charts
 
 load_dotenv()
 
@@ -31,6 +31,7 @@ app.include_router(finance.router, prefix="/api/finance", tags=["finance"])
 app.include_router(crypto.router, prefix="/api/crypto", tags=["crypto"])
 app.include_router(stocks.router, prefix="/api/stocks", tags=["stocks"])
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
+app.include_router(charts.router, prefix="/api/charts", tags=["charts"])
 
 @app.get("/")
 async def root():
